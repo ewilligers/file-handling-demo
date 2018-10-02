@@ -1,28 +1,37 @@
 <!DOCTYPE html>
-<section id="report">
-<script>
-  'use strict';
-  const report = document.getElementById('report');
-  function log(message) {
-    console.log(message);
-    const p = document.createElement('p');
-    p.textContent = message;
-    report.appendChild(p);
-  }
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>File Handling demo</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+</head>
+<body>
+  <section id="report"></section>
+  <script>
+    'use strict';
+    const report = document.getElementById('report');
+    function log(message) {
+      const p = document.createElement('p');
+      p.textContent = message;
+      report.appendChild(p);
 
-  var fileSystem = null;
-  function successCallback(fs) {
-    fileSystem = fs;
-    log("Successfully obtained FileSystem:" + fileSystem.name);
-  }
+      console.log(message);
+    }
 
-  function errorCallback(error)
-  {
-    log("Error occurred:" + error.name);
-  }
+    var fileSystem = null;
+    function successCallback(fs) {
+      fileSystem = fs;
+      log("Successfully obtained FileSystem:" + fileSystem.name);
+    }
 
-  window.onload = () => {
-    webkitRequestFileSystem(window.PERSISTENT, 100, successCallback, errorCallback);
-  };
-</script>
+    function errorCallback(error)
+    {
+      log("Error occurred:" + error.name);
+    }
 
+    window.onload = () => {
+      webkitRequestFileSystem(window.PERSISTENT, 100, successCallback, errorCallback);
+    };
+  </script>
+</body>
+</html>
