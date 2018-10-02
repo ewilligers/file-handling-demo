@@ -9,6 +9,39 @@
   <section id="report"></section>
   <script>
     'use strict';
+
+    // JoinHelper is from third_party/WebKit/LayoutTests/fast/filesystem/resources/fs-test-util.js
+    var JoinHelper = function()
+    {
+        this.pendingOperations = [];
+        this.pendingOperationCount = 0;
+        this.joinCallback = null;
+
+        this.run = function(operation)
+        {
+            this.pendingOperationCount++;
+            operation();
+        };
+
+        // Call this when an operation is done.
+        this.done = function()
+        {
+            this.pendingOperationCount--;
+            if (this.pendingOperationCount == 0 && this.joinCallback)
+                this.joinCallback();
+        };
+
+        // This eventually calls the joinCallback when helper.done() is called as many times as helper.run() is called.
+        this.join = function(joinCallback)
+        {
+            if (this.pendingOperationCount == 0)
+                joinCallback();
+            else
+                this.joinCallback = joinCallback;
+        };
+    };
+
+
     const report = document.getElementById('report');
     function log(message) {
       const p = document.createElement('p');
@@ -18,10 +51,42 @@
       console.log(message);
     }
 
+    var reader = null;
+
+    function entriesCallback(entries)
+    {
+      log(entries);
+      if (entries.length) {
+        reader.readEntries(entriesCallback, errorCallback);
+      } else {
+        log("Done");
+      }
+    }
+
     var fileSystem = null;
+
+    function readFileSystem()
+    {
+      reader = fileSystem.root.createReader();
+      reader.readEntries(entriesCallback, errorCallback);
+    }
+
+    function populateFileSystem()
+    {
+      const helper = new JoinHelper();
+      const done = () => { helper.done(); };
+
+      // Random names
+      helper.run(() => { fileSystem.root.getFile("5916b76f8e304eb3ad419fa02dc5e48c.txt", {create: true}, done, errorCallback); });
+      helper.run(() => { fileSystem.root.getDirectory("9e4f2f83365649b0a7482177235e61f8", {create: true}, done, errorCallback); });
+      helper.join(readFileSystem);
+    }
+
     function successCallback(fs) {
       fileSystem = fs;
       log("Successfully obtained FileSystem:" + fileSystem.name);
+
+      populateFileSystem();
     }
 
     function errorCallback(error)
@@ -30,8 +95,10 @@
     }
 
     window.onload = () => {
-      webkitRequestFileSystem(window.PERSISTENT, 100, successCallback, errorCallback);
+      webkitRequestFileSystem(window.TEMPORARY, 100, successCallback, errorCallback);
+      // webkitRequestFileSystem(window.PERSISTENT, 100, successCallback, errorCallback);
     };
+
   </script>
 </body>
 </html>
