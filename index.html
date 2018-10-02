@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<section id="report">
+<script>
+  'use strict';
+  const report = document.getElementById('report');
+  function log(message) {
+    console.log(message);
+    const p = document.createElement('p');
+    p.textContent = message;
+    report.appendChild(p);
+  }
+
+  var fileSystem = null;
+  function successCallback(fs) {
+    fileSystem = fs;
+    log("Successfully obtained Persistent FileSystem:" + fileSystem.name);
+  }
+
+  function errorCallback(error)
+  {
+    log("Error occurred:" + error.name);
+  }
+
+  window.onload = () => {
+    webkitRequestFileSystem(window.TEMPORARY, 100, successCallback, errorCallback);
+  };
+</script>
+
